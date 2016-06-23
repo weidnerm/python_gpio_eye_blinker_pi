@@ -8,17 +8,39 @@ brightness = 0.0
 def setBrightnessThread():
 	global brightness
 	while True:
-		brightness = 1.0
-		#print("brightness=%d" %(brightness))
+		brightness = 25.0
 		time.sleep(1)
 
-		brightness = 7.0
-		#print("brightness=%d" %(brightness))
-		time.sleep(1)
+		brightness = 20.0
+		time.sleep(.033*1)  # blink pose 2
 	
-		brightness = 24.0
-		#print("brightness=%d" %(brightness))
+		brightness = 0.0
+		time.sleep(.033*2)  # blink pose 3,4
+	
+		brightness = 2.0
+		time.sleep(.033*1)  # blink pose 5
+	
+		brightness = 10.0
+		time.sleep(.033*1)  # blink pose 6
+	
+
+
+
+
+
+		brightness = 25.0
 		time.sleep(1)
+
+
+
+
+		brightness = 0.0
+		time.sleep(.033*6)  # blink pose 3,4
+
+		brightness = 25.0
+		time.sleep(1)
+
+
 
 
 
@@ -43,20 +65,22 @@ def brightnessWorker():
 
 	while True:
 		# turn on outputs for brief time
-		RPi.GPIO.output(2, True)
-		RPi.GPIO.output(3, True)
-		RPi.GPIO.output(4, True)
-		RPi.GPIO.output(17, True)
-		RPi.GPIO.output(27, True)
-		time.sleep(brightness/1000)
+		if brightness != 0:
+			RPi.GPIO.output(2, True)
+			RPi.GPIO.output(3, True)
+			RPi.GPIO.output(4, True)
+			RPi.GPIO.output(17, True)
+			RPi.GPIO.output(27, True)
+			time.sleep(brightness/1000)
 
 		# turn off outputs for remaining part of time.
-		RPi.GPIO.output(2, False)
-		RPi.GPIO.output(3, False)
-		RPi.GPIO.output(4, False)
-		RPi.GPIO.output(17, False)
-		RPi.GPIO.output(27, False)
-		time.sleep((25-brightness)/1000)
+		if brightness != 25:
+			RPi.GPIO.output(2, False)
+			RPi.GPIO.output(3, False)
+			RPi.GPIO.output(4, False)
+			RPi.GPIO.output(17, False)
+			RPi.GPIO.output(27, False)
+			time.sleep((25-brightness)/1000)
 
 		count = count + 1;
 		if count == 40:
