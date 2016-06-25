@@ -2,6 +2,13 @@ import RPi.GPIO
 import time
 import thread
 import random
+import pygame
+
+pygame.mixer.init()
+pygame.mixer.music.load("eerie-forest.mp3")
+pygame.mixer.music.play()
+
+
 
 brightness = [0.0, 0.0, 0.0, 0.0, 0.0] 
 gpioNumber = [2,3,4,17,27]
@@ -85,7 +92,11 @@ try:
 except:
 	print "Error: unable to start thread"
 
+
 while True:
-	time.sleep(1)
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy() == True:
+		time.sleep(0.25)
+	print("completed sound")
 
 
