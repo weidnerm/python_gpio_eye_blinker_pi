@@ -26,9 +26,11 @@ def playSound(soundObject,minDelay, maxDelay ):
 		time.sleep(random.randint(minDelay,maxDelay))
 	
 
-def setBrightnessThread(name, gpioIndex):
+def setBrightnessThread(name, gpioIndex, soundObject=None, minDelay=5, maxDelay=25 ):
 	global brightness
 	while True:
+		if ( not soundObject == None ):
+			playChannel = soundObject.play()
 		brightness[gpioIndex] = 25.0
 		time.sleep(1)
 
@@ -50,7 +52,12 @@ def setBrightnessThread(name, gpioIndex):
 
 
 		brightness[gpioIndex] = 25.0
-		time.sleep(random.randint(2,10))
+
+		if ( not soundObject == None ):
+			while playChannel.get_busy() == True:
+				time.sleep(0.25)
+
+		time.sleep(random.randint(minDelay,maxDelay))
 
 
 
@@ -85,17 +92,17 @@ def brightnessWorker(name, gpioIndex):
 			
 
 try:
-	thread.start_new_thread( setBrightnessThread, ("owl", 0) )
-	thread.start_new_thread( setBrightnessThread, ("leftbook", 1) )
+	thread.start_new_thread( setBrightnessThread, ("owl", 0, owlHoot      , 2, 10) )
+	thread.start_new_thread( setBrightnessThread, ("leftbook", 1, wolf_1       , 5, 20) )
 	thread.start_new_thread( setBrightnessThread, ("bear", 2) )
 	thread.start_new_thread( setBrightnessThread, ("troll", 3) )
-	thread.start_new_thread( setBrightnessThread, ("tv spider", 4) )
+	thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl, 5, 20) )
 except:
 	print "Error: unable to start setBrightnessThread thread"
 
 
 try:
-	thread.start_new_thread( brightnessWorker, ("owl", 0) )
+	thread.start_new_thread( brightnessWorker, ("owl", 0 ) )
 	thread.start_new_thread( brightnessWorker, ("leftbook", 1) )
 	thread.start_new_thread( brightnessWorker, ("bear", 2) )
 	thread.start_new_thread( brightnessWorker, ("troll", 3) )
@@ -104,9 +111,10 @@ except:
 	print "Error: unable to start thread"
 
 try:
-	thread.start_new_thread( playSound, (owlHoot      , 5, 20) )
-	thread.start_new_thread( playSound, (largeWolfHowl, 5, 20) )
-	thread.start_new_thread( playSound, (wolf_1       , 5, 20) )
+#	thread.start_new_thread( playSound, (owlHoot      , 5, 20) )
+#	thread.start_new_thread( playSound, (largeWolfHowl, 5, 20) )
+#	thread.start_new_thread( playSound, (wolf_1       , 5, 20) )
+	pass
 except:
 	print "Error: unable to start sound thread"
 
