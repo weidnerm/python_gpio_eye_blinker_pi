@@ -7,13 +7,23 @@ import pygame
 pygame.mixer.init()
 pygame.mixer.music.load("eerie-forest.mp3")
 pygame.mixer.music.play()
-
+owlHoot = pygame.mixer.Sound("owlhoot-clean.wav")
 
 
 brightness = [0.0, 0.0, 0.0, 0.0, 0.0] 
 gpioNumber = [2,3,4,17,27]
 
 RPi.GPIO.setmode(RPi.GPIO.BCM)
+
+def playOwlHoots(name, dummy):
+	while True:
+		global owlHoot
+		owlPlayChannel = owlHoot.play()
+		while owlPlayChannel.get_busy() == True:
+			time.sleep(0.25)
+		#print("completed owl sound")
+		time.sleep(random.randint(5,10))
+	
 
 def setBrightnessThread(name, gpioIndex):
 	global brightness
@@ -53,7 +63,7 @@ def brightnessWorker(name, gpioIndex):
 	global brightness
 	global gpioNumber
 
-	print "starting %s on gpioNumber[%d] = %d" % (name, gpioIndex, gpioNumber[gpioIndex] )
+	#print "starting %s on gpioNumber[%d] = %d" % (name, gpioIndex, gpioNumber[gpioIndex] )
 
 	RPi.GPIO.setup(gpioNumber[gpioIndex], RPi.GPIO.OUT)
 
@@ -91,6 +101,12 @@ try:
 	thread.start_new_thread( brightnessWorker, ("tv spider", 4) )
 except:
 	print "Error: unable to start thread"
+
+try:
+	thread.start_new_thread( playOwlHoots, ("owl", 0) )
+
+except:
+	print "Error: unable to start sound thread"
 
 
 while True:
