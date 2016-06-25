@@ -3,15 +3,28 @@ import time
 import thread
 import random
 import pygame
+import argparse
 
-pygame.mixer.init()
-pygame.mixer.music.load("eerie-forest.mp3")
-pygame.mixer.music.play()
-owlHoot       = pygame.mixer.Sound("owlhoot-clean.wav")
-largeWolfHowl = pygame.mixer.Sound("large-wolf-howl.wav")
-wolf_1        = pygame.mixer.Sound("wolf_1.wav")
-clownlaugh    = pygame.mixer.Sound("clown-laugh.wav")
 
+parser=argparse.ArgumentParser(description='Create creepy scene with randomly blinking eyes.')
+parser.add_argument('-s', '--sound', action='store_true', help='Enable Sound output')
+args = parser.parse_args()
+
+
+if (args.sound):
+	pygame.mixer.init()
+	pygame.mixer.music.load("eerie-forest.mp3")
+	pygame.mixer.music.play()
+	owlHoot       = pygame.mixer.Sound("owlhoot-clean.wav")
+	largeWolfHowl = pygame.mixer.Sound("large-wolf-howl.wav")
+	wolf_1        = pygame.mixer.Sound("wolf_1.wav")
+	clownlaugh    = pygame.mixer.Sound("clown-laugh.wav")
+else:
+	owlHoot       = None
+	largeWolfHowl = None
+	wolf_1        = None
+	clownlaugh    = None
+	
 
 brightness = [0.0, 0.0, 0.0, 0.0, 0.0] 
 gpioNumber = [2,3,4,17,27]
@@ -20,9 +33,10 @@ RPi.GPIO.setmode(RPi.GPIO.BCM)
 
 def playSound(soundObject,minDelay, maxDelay ):
 	while True:
-		playChannel = soundObject.play()
-		while playChannel.get_busy() == True:
-			time.sleep(0.25)
+		if (args.sound):
+			playChannel = soundObject.play()
+			while playChannel.get_busy() == True:
+				time.sleep(0.25)
 		#print("completed owl sound")
 		time.sleep(random.randint(minDelay,maxDelay))
 	
@@ -120,9 +134,11 @@ except:
 	print "Error: unable to start sound thread"
 
 while True:
-	pygame.mixer.music.play()
-	while pygame.mixer.music.get_busy() == True:
-		time.sleep(0.25)
-	print("completed sound")
-
+	if (args.sound):
+		pygame.mixer.music.play()
+		while pygame.mixer.music.get_busy() == True:
+			time.sleep(0.25)
+		print("completed sound")
+	else:
+		time.sleep(1)
 
