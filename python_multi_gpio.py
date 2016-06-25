@@ -7,9 +7,10 @@ import pygame
 pygame.mixer.init()
 pygame.mixer.music.load("eerie-forest.mp3")
 pygame.mixer.music.play()
-owlHoot = pygame.mixer.Sound("owlhoot-clean.wav")
+owlHoot       = pygame.mixer.Sound("owlhoot-clean.wav")
 largeWolfHowl = pygame.mixer.Sound("large-wolf-howl.wav")
-wolf_1 = pygame.mixer.Sound("wolf_1.wav")
+wolf_1        = pygame.mixer.Sound("wolf_1.wav")
+clownlaugh    = pygame.mixer.Sound("clown-laugh.wav")
 
 
 brightness = [0.0, 0.0, 0.0, 0.0, 0.0] 
@@ -92,11 +93,11 @@ def brightnessWorker(name, gpioIndex):
 			
 
 try:
-	thread.start_new_thread( setBrightnessThread, ("owl", 0, owlHoot      , 2, 10) )
-	thread.start_new_thread( setBrightnessThread, ("leftbook", 1, wolf_1       , 5, 20) )
-	thread.start_new_thread( setBrightnessThread, ("bear", 2) )
-	thread.start_new_thread( setBrightnessThread, ("troll", 3) )
-	thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl, 5, 20) )
+	thread.start_new_thread( setBrightnessThread, ("owl",       0, owlHoot      , 5,  30) )
+	thread.start_new_thread( setBrightnessThread, ("leftbook",  1, wolf_1       , 10, 30) )
+	thread.start_new_thread( setBrightnessThread, ("bear",      2) )
+	thread.start_new_thread( setBrightnessThread, ("troll",     3, clownlaugh   , 10,  30) )
+	thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl, 10,  30) )
 except:
 	print "Error: unable to start setBrightnessThread thread"
 
