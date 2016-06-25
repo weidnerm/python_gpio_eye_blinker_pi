@@ -109,8 +109,8 @@ def brightnessWorker(name, gpioIndex):
 
 try:
 	thread.start_new_thread( setBrightnessThread, ("owl",       0, owlHoot      , 5,  30) )
-	thread.start_new_thread( setBrightnessThread, ("leftbook",  1, wolf_1       , 10, 30) )
-	thread.start_new_thread( setBrightnessThread, ("bear",      2) )
+	thread.start_new_thread( setBrightnessThread, ("small owl", 1, owlHoot      , 5,  30) )
+	thread.start_new_thread( setBrightnessThread, ("bear",      2, wolf_1       , 10,  30) )
 	thread.start_new_thread( setBrightnessThread, ("troll",     3, clownlaugh   , 10,  30) )
 	thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl, 10,  30) )
 except:
@@ -119,7 +119,7 @@ except:
 
 try:
 	thread.start_new_thread( brightnessWorker, ("owl", 0 ) )
-	thread.start_new_thread( brightnessWorker, ("leftbook", 1) )
+	thread.start_new_thread( brightnessWorker, ("small owl", 1) )
 	thread.start_new_thread( brightnessWorker, ("bear", 2) )
 	thread.start_new_thread( brightnessWorker, ("troll", 3) )
 	thread.start_new_thread( brightnessWorker, ("tv spider", 4) )
