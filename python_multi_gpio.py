@@ -30,6 +30,7 @@ brightness = [0.0, 0.0, 0.0, 0.0, 0.0]
 gpioNumber = [2,3,4,17,27]
 
 RPi.GPIO.setmode(RPi.GPIO.BCM)
+RPi.GPIO.setwarnings(False)
 
 def playSound(soundObject,minDelay, maxDelay ):
 	while True:
