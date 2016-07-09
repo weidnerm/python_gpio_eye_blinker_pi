@@ -35,10 +35,12 @@ try:
 	gpioNumber = [2,3,4,17,27]    # physical gpio numbers
 	rightToLeft = [3,4,0,1,2]    # order of logical outputs in desired order
 	waitEvents = []
+	waitEventsDone = []
 	for index in xrange(5):
 		RPi.GPIO.setup(gpioNumber[index], RPi.GPIO.OUT)
 		RPi.GPIO.output(gpioNumber[index], False)
 		waitEvents.append(threading.Event() )
+		waitEventsDone.append(threading.Event() )
 
 	def playSound(soundObject,minDelay, maxDelay ):
 		while True:
@@ -52,7 +54,7 @@ try:
 
 	def handleBlinkSequence(gpioIndex):
 		brightness[gpioIndex] = 25.0
-		time.sleep(1)
+		time.sleep(.033)
 
 		brightness[gpioIndex] = 20.0
 		time.sleep(.033*1)  # blink pose 2
@@ -68,6 +70,10 @@ try:
 
 		brightness[gpioIndex] = 25.0
 
+	def waitTillAllComplete():
+		for index in xrange(5):
+			waitEventsDone[index].wait();
+			waitEventsDone[index].clear();
 
 	def setBrightnessThread(name, gpioIndex, soundObject=None, minDelay=5, maxDelay=25 ):
 		global brightness
@@ -85,6 +91,7 @@ try:
 					time.sleep(0.25)
 
 #			time.sleep(random.randint(minDelay,maxDelay))
+			waitEventsDone[gpioIndex].set();   #signal that we are done.
 
 
 
@@ -95,7 +102,7 @@ try:
 			sequenceBlinkLeftToRight()
 			time.sleep(1)
 			sequenceBlinkAllBlink()
-			time.sleep(1)
+#			time.sleep(1)
 			sequenceBlinkAllBlink()
 			time.sleep(1)
 		
@@ -103,27 +110,32 @@ try:
 		for index in xrange(5):
 			waitEvents[index].set()
 			time.sleep(0.25)
+		waitTillAllComplete()
 			
 	def sequenceBlinkDown():
 		for index in xrange(5):
 			waitEvents[4-index].set()
 			time.sleep(0.25)
+		waitTillAllComplete()
 		
 	def sequenceBlinkAllBlink():
 		for index in xrange(5):
 			waitEvents[4-index].set()
+		waitTillAllComplete()
 		
 	def sequenceBlinkRightToLeft():
 		for tempindex in xrange(5):
 			index = rightToLeft[tempindex]
 			waitEvents[index].set()
 			time.sleep(0.25)
+		waitTillAllComplete()
 
 	def sequenceBlinkLeftToRight():
 		for tempindex in xrange(5):
 			index = rightToLeft[4-tempindex]
 			waitEvents[index].set()
 			time.sleep(0.25)
+		waitTillAllComplete()
 
 
 
