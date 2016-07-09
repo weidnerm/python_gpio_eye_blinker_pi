@@ -34,6 +34,8 @@ try:
 	brightness = [0.0, 0.0, 0.0, 0.0, 0.0]   # brightness levels 0=off;  25=on full brightness
 	gpioNumber = [2,3,4,17,27]    # physical gpio numbers
 	rightToLeft = [3,4,0,1,2]    # order of logical outputs in desired order
+	minimumRandomWaits = [50, 50, 100,100,100]   # owl, small owl, bear, troll, tv spider
+	maximumRandomWaits = [300,300,300,300,300]   # owl, small owl, bear, troll, tv spider
 	waitEvents = []
 	waitEventsDone = []
 	for index in xrange(5):
@@ -105,6 +107,7 @@ try:
 #			time.sleep(1)
 			sequenceBlinkAllBlink()
 			time.sleep(1)
+			randomSequence(400); # in 0.1 second increments
 		
 	def sequenceBlinkUp():
 		for index in xrange(5):
@@ -137,6 +140,20 @@ try:
 			time.sleep(0.25)
 		waitTillAllComplete()
 
+	def randomSequence(duration):  # duration is in 0.1 second increments
+		triggerPoints = []
+		for tempindex in xrange(5):  # generate initial delay values.
+			triggerPoints.append(random.randint(minimumRandomWaits[tempindex], maximumRandomWaits[tempindex]))
+			
+		while(duration > 0):
+			for tempindex in xrange(5):
+				triggerPoints[tempindex] = triggerPoints[tempindex]-1;
+				if ( triggerPoints[tempindex] == 0 ):
+					triggerPoints[tempindex] = random.randint(minimumRandomWaits[tempindex], maximumRandomWaits[tempindex])
+					waitEvents[tempindex].set()
+			time.sleep(0.1)
+			duration = duration-1;
+		waitTillAllComplete()
 
 
 
@@ -158,7 +175,6 @@ try:
 			if brightness[gpioIndex] != 25:
 				RPi.GPIO.output(gpioNumber[gpioIndex], False)
 				time.sleep((25-brightness[gpioIndex])/1000)
-
 
 
 
