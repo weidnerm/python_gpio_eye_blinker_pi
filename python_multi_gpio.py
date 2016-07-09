@@ -4,11 +4,16 @@ import thread
 import random
 import pygame
 import argparse
+import threading
 
 
 parser=argparse.ArgumentParser(description='Create creepy scene with randomly blinking eyes.')
 parser.add_argument('-s', '--sound', action='store_true', help='Enable Sound output')
 args = parser.parse_args()
+
+RPi.GPIO.setmode(RPi.GPIO.BCM)
+RPi.GPIO.setwarnings(False)
+
 
 try:
 	if (args.sound):
@@ -24,13 +29,16 @@ try:
 		largeWolfHowl = None
 		wolf_1        = None
 		clownlaugh    = None
-		
 
-	brightness = [0.0, 0.0, 0.0, 0.0, 0.0] 
-	gpioNumber = [2,3,4,17,27]
 
-	RPi.GPIO.setmode(RPi.GPIO.BCM)
-	RPi.GPIO.setwarnings(False)
+	brightness = [0.0, 0.0, 0.0, 0.0, 0.0]   # brightness levels 0=off;  25=on full brightness
+	gpioNumber = [2,3,4,17,27]    # physical gpio numbers
+	rightToLeft = [3,4,0,1,2]    # order of logical outputs in desired order
+	waitEvents = []
+	for index in xrange(5):
+		RPi.GPIO.setup(gpioNumber[index], RPi.GPIO.OUT)
+		RPi.GPIO.output(gpioNumber[index], False)
+		waitEvents.append(threading.Event() )
 
 	def playSound(soundObject,minDelay, maxDelay ):
 		while True:
@@ -40,45 +48,82 @@ try:
 					time.sleep(0.25)
 			#print("completed owl sound")
 			time.sleep(random.randint(minDelay,maxDelay))
-		
+
+
+	def handleBlinkSequence(gpioIndex):
+		brightness[gpioIndex] = 25.0
+		time.sleep(1)
+
+		brightness[gpioIndex] = 20.0
+		time.sleep(.033*1)  # blink pose 2
+
+		brightness[gpioIndex] = 0.0
+		time.sleep(.033*2)  # blink pose 3,4
+
+		brightness[gpioIndex] = 2.0
+		time.sleep(.033*1)  # blink pose 5
+
+		brightness[gpioIndex] = 10.0
+		time.sleep(.033*1)  # blink pose 6
+
+		brightness[gpioIndex] = 25.0
+
 
 	def setBrightnessThread(name, gpioIndex, soundObject=None, minDelay=5, maxDelay=25 ):
 		global brightness
 		while True:
+			waitEvents[gpioIndex].wait()   # wait till we are told to blink.
+			waitEvents[gpioIndex].clear()
+			
 			if ( not soundObject == None ):
 				playChannel = soundObject.play()
-			brightness[gpioIndex] = 25.0
-			time.sleep(1)
 
-			brightness[gpioIndex] = 20.0
-			time.sleep(.033*1)  # blink pose 2
-		
-			brightness[gpioIndex] = 0.0
-			time.sleep(.033*2)  # blink pose 3,4
-		
-			brightness[gpioIndex] = 2.0
-			time.sleep(.033*1)  # blink pose 5
-		
-			brightness[gpioIndex] = 10.0
-			time.sleep(.033*1)  # blink pose 6
-		
-
-
-
-
-
-			brightness[gpioIndex] = 25.0
+			handleBlinkSequence(gpioIndex)
 
 			if ( not soundObject == None ):
 				while playChannel.get_busy() == True:
 					time.sleep(0.25)
 
-			time.sleep(random.randint(minDelay,maxDelay))
+#			time.sleep(random.randint(minDelay,maxDelay))
 
 
 
+	def masterControlThread():
+		while True:
+			sequenceBlinkRightToLeft()
+			time.sleep(1)
+			sequenceBlinkLeftToRight()
+			time.sleep(1)
+			sequenceBlinkAllBlink()
+			time.sleep(1)
+			sequenceBlinkAllBlink()
+			time.sleep(1)
+		
+	def sequenceBlinkUp():
+		for index in xrange(5):
+			waitEvents[index].set()
+			time.sleep(0.25)
+			
+	def sequenceBlinkDown():
+		for index in xrange(5):
+			waitEvents[4-index].set()
+			time.sleep(0.25)
+		
+	def sequenceBlinkAllBlink():
+		for index in xrange(5):
+			waitEvents[4-index].set()
+		
+	def sequenceBlinkRightToLeft():
+		for tempindex in xrange(5):
+			index = rightToLeft[tempindex]
+			waitEvents[index].set()
+			time.sleep(0.25)
 
-
+	def sequenceBlinkLeftToRight():
+		for tempindex in xrange(5):
+			index = rightToLeft[4-tempindex]
+			waitEvents[index].set()
+			time.sleep(0.25)
 
 
 
@@ -89,9 +134,7 @@ try:
 
 		#print "starting %s on gpioNumber[%d] = %d" % (name, gpioIndex, gpioNumber[gpioIndex] )
 
-		RPi.GPIO.setup(gpioNumber[gpioIndex], RPi.GPIO.OUT)
 
-		RPi.GPIO.output(gpioNumber[gpioIndex], False)
 
 		while True:
 			# turn on outputs for brief time
@@ -105,7 +148,7 @@ try:
 				time.sleep((25-brightness[gpioIndex])/1000)
 
 
-				
+
 
 	try:
 		thread.start_new_thread( setBrightnessThread, ("owl",       0, owlHoot      , 5,  30) )
@@ -127,12 +170,9 @@ try:
 		print "Error: unable to start thread"
 
 	try:
-	#	thread.start_new_thread( playSound, (owlHoot      , 5, 20) )
-	#	thread.start_new_thread( playSound, (largeWolfHowl, 5, 20) )
-	#	thread.start_new_thread( playSound, (wolf_1       , 5, 20) )
-		pass
+	 	thread.start_new_thread( masterControlThread() )
 	except:
-		print "Error: unable to start sound thread"
+		print "Error: unable to start masterControlThread thread"
 
 	while True:
 		if (args.sound):
@@ -145,5 +185,6 @@ try:
 
 finally:
 	for gpio in gpioNumber:
+		waitEvents[index].set()
 		RPi.GPIO.output(gpio, False)
-		
+
