@@ -38,6 +38,7 @@ try:
 	maximumRandomWaits = [300,300,300,300,300]   # owl, small owl, bear, troll, tv spider
 	waitEvents = []
 	waitEventsDone = []
+	randomSoundEnabled = False
 	for index in xrange(5):
 		RPi.GPIO.setup(gpioNumber[index], RPi.GPIO.OUT)
 		RPi.GPIO.output(gpioNumber[index], False)
@@ -77,20 +78,20 @@ try:
 			waitEventsDone[index].wait();
 			waitEventsDone[index].clear();
 
-	def setBrightnessThread(name, gpioIndex, soundObject=None, minDelay=5, maxDelay=25 ):
+	def setBrightnessThread(name, gpioIndex, soundObject=None ):
 		global brightness
 		while True:
 			waitEvents[gpioIndex].wait()   # wait till we are told to blink.
 			waitEvents[gpioIndex].clear()
 			
-			if ( not soundObject == None ):
+			if ( not soundObject == None ) and ( randomSoundEnabled == True):
 				playChannel = soundObject.play()
 
 			handleBlinkSequence(gpioIndex)
 
-			if ( not soundObject == None ):
-				while playChannel.get_busy() == True:
-					time.sleep(0.25)
+#			if ( not soundObject == None ) and (randomSoundEnabled == True):
+#				while playChannel.get_busy() == True:
+#					time.sleep(0.25)
 
 #			time.sleep(random.randint(minDelay,maxDelay))
 			waitEventsDone[gpioIndex].set();   #signal that we are done.
@@ -100,9 +101,21 @@ try:
 	def masterControlThread():
 		while True:
 			sequenceBlinkRightToLeft()
-			time.sleep(1)
+			time.sleep(.25)
 			sequenceBlinkLeftToRight()
-			time.sleep(1)
+			time.sleep(.25)
+			sequenceBlinkRightToLeft()
+			time.sleep(.25)
+			sequenceBlinkLeftToRight()
+			time.sleep(.25)
+			sequenceBlinkRightToLeft()
+			time.sleep(.25)
+			sequenceBlinkLeftToRight()
+			time.sleep(.25)
+			sequenceBlinkRightToLeft()
+			time.sleep(.25)
+			sequenceBlinkLeftToRight()
+			time.sleep(.25)
 			sequenceBlinkAllBlink()
 #			time.sleep(1)
 			sequenceBlinkAllBlink()
@@ -130,18 +143,21 @@ try:
 		for tempindex in xrange(5):
 			index = rightToLeft[tempindex]
 			waitEvents[index].set()
-			time.sleep(0.25)
+			time.sleep(0.1)
 		waitTillAllComplete()
 
 	def sequenceBlinkLeftToRight():
 		for tempindex in xrange(5):
 			index = rightToLeft[4-tempindex]
 			waitEvents[index].set()
-			time.sleep(0.25)
+			time.sleep(0.1)
 		waitTillAllComplete()
 
 	def randomSequence(duration):  # duration is in 0.1 second increments
+		global randomSoundEnabled 
+
 		triggerPoints = []
+		randomSoundEnabled = True
 		for tempindex in xrange(5):  # generate initial delay values.
 			triggerPoints.append(random.randint(minimumRandomWaits[tempindex], maximumRandomWaits[tempindex]))
 			
@@ -154,6 +170,7 @@ try:
 			time.sleep(0.1)
 			duration = duration-1;
 		waitTillAllComplete()
+		randomSoundEnabled = False
 
 
 
@@ -179,11 +196,11 @@ try:
 
 
 	try:
-		thread.start_new_thread( setBrightnessThread, ("owl",       0, owlHoot      , 5,  30) )
-		thread.start_new_thread( setBrightnessThread, ("small owl", 1, owlHoot      , 5,  30) )
-		thread.start_new_thread( setBrightnessThread, ("bear",      2, wolf_1       , 10,  30) )
-		thread.start_new_thread( setBrightnessThread, ("troll",     3, clownlaugh   , 10,  30) )
-		thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl, 10,  30) )
+		thread.start_new_thread( setBrightnessThread, ("owl",       0, owlHoot      ) )
+		thread.start_new_thread( setBrightnessThread, ("small owl", 1, owlHoot      ) )
+		thread.start_new_thread( setBrightnessThread, ("bear",      2, wolf_1       ) )
+		thread.start_new_thread( setBrightnessThread, ("troll",     3, clownlaugh   ) )
+		thread.start_new_thread( setBrightnessThread, ("tv spider", 4, largeWolfHowl) )
 	except:
 		print "Error: unable to start setBrightnessThread thread"
 
