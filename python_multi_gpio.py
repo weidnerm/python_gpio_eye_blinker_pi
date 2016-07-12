@@ -8,7 +8,8 @@ import threading
 
 
 parser=argparse.ArgumentParser(description='Create creepy scene with randomly blinking eyes.')
-parser.add_argument('-s', '--sound', action='store_true', help='Enable Sound output')
+parser.add_argument('-s', '--sound', action='store_true', help='Enable Background Sound output')
+parser.add_argument('-e', '--eyeblink', action='store_true', help='Enable Eyeblink Sound output')
 args = parser.parse_args()
 
 RPi.GPIO.setmode(RPi.GPIO.BCM)
@@ -16,10 +17,12 @@ RPi.GPIO.setwarnings(False)
 
 
 try:
-	if (args.sound):
+	if (args.sound) or (args.eyeblink):
 		pygame.mixer.init()
+	if (args.sound):
 		pygame.mixer.music.load("eerie-forest.mp3")
 		pygame.mixer.music.play()
+	if (args.eyeblink):
 		owlHoot       = pygame.mixer.Sound("owlhoot-clean.wav")
 		largeWolfHowl = pygame.mixer.Sound("large-wolf-howl.wav")
 		wolf_1        = pygame.mixer.Sound("wolf_1.wav")
@@ -47,7 +50,7 @@ try:
 
 	def playSound(soundObject,minDelay, maxDelay ):
 		while True:
-			if (args.sound):
+			if (args.eyeblink):
 				playChannel = soundObject.play()
 				while playChannel.get_busy() == True:
 					time.sleep(0.25)
